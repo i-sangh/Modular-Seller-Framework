@@ -1,11 +1,15 @@
+// Load environment variables first, before any other code
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Configure dotenv with explicit path
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
-
-dotenv.config();
 
 // Initialize express app
 const app = express();

@@ -36,3 +36,5 @@ export const logoutUser = async () => {
     throw new Error(error.response?.data?.message || 'Logout failed');
   }
 };
+
+export default api;

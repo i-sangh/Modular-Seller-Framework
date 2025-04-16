@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       const data = await registerUser(userData);
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
-      return { success: true };
+      return { success: true, verificationPending: data.verificationPending };
     } catch (error) {
       return { success: false, message: error.message };
     }

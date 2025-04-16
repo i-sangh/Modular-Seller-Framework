@@ -16,6 +16,7 @@ const Register = () => {
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const countryDropdownRef = useRef(null);
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -91,6 +92,9 @@ const Register = () => {
       return;
     }
     
+    // Set loading state
+    setIsLoading(true);
+    
     // Create userData with name for backend
     const userData = {
       name: formData.name.trim(),
@@ -100,11 +104,19 @@ const Register = () => {
       password: formData.password
     };
     
-    const result = await register(userData);
-    if (result.success) {
-      navigate('/');
-    } else {
-      setError(result.message);
+    try {
+      const result = await register(userData);
+      if (result.success && result.verificationPending) {
+        navigate('/verify-email', { state: { email: formData.email } });
+      } else if (result.success) {
+        navigate('/');
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -252,9 +264,20 @@ const Register = () => {
             
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition-colors"
+              disabled={isLoading}
+              className={`w-full py-2 px-4 ${isLoading ? 'bg-primary-400' : 'bg-primary-600 hover:bg-primary-700'} text-white font-medium rounded-md transition-colors flex justify-center items-center`}
             >
-              CONTINUE
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  PROCESSING...
+                </>
+              ) : (
+                'CONTINUE'
+              )}
             </button>
           </form>
           

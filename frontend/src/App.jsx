@@ -4,6 +4,7 @@ import Navbar from './components/Layout/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import EmailVerification from './pages/Auth/EmailVerification';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<EmailVerification />} />
             </Routes>
           </main>
         </div>
