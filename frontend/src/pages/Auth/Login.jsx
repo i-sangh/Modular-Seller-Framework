@@ -61,7 +61,7 @@ const Login = () => {
               />
             </div>
             
-            <div className="mb-6">
+            <div className="mb-4">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
@@ -74,11 +74,16 @@ const Login = () => {
                 onChange={handleChange}
                 required
               />
+              <div className="flex justify-end mt-1">
+                <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-800">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
             
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition-colors"
+              className="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-md transition-colors mt-4"
             >
               CONTINUE
             </button>

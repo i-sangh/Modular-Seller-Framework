@@ -8,7 +8,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phoneCountryCode: '+1',
+    phoneCountryCode: '+1 : United States',
     phoneNumber: '',
     password: ''
   });
@@ -48,10 +48,10 @@ const Register = () => {
     }
   };
 
-  const handleCountryCodeSelect = (code) => {
+  const handleCountryCodeSelect = (code, country) => {
     setFormData({
       ...formData,
-      phoneCountryCode: code
+      phoneCountryCode: `${code} : ${country}`
     });
     setShowCountryDropdown(false);
   };
@@ -120,9 +120,14 @@ const Register = () => {
     }
   };
 
-  // Get current selected country data
-  const selectedCountry = countryCodes.find(c => c.code === formData.phoneCountryCode) || 
-    { iso2: 'US', country: 'United States', code: '+1' };
+  // Get current selected country data from the combined string
+  const getSelectedCountryData = () => {
+    const codeOnly = formData.phoneCountryCode.split(' : ')[0];
+    return countryCodes.find(c => c.code === codeOnly) || 
+      { iso2: 'US', country: 'United States', code: '+1' };
+  };
+
+  const selectedCountry = getSelectedCountryData();
 
   return (
     <div className="flex justify-center items-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
@@ -186,8 +191,8 @@ const Register = () => {
                 <div className="relative" ref={countryDropdownRef}>
                   <button
                     type="button"
+                    className="flex items-center px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100"
                     onClick={toggleCountryDropdown}
-                    className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-24"
                   >
                     <span className="flex items-center">
                       <ReactCountryFlag 
@@ -199,7 +204,7 @@ const Register = () => {
                           marginRight: '0.5rem'
                         }}
                       />
-                      <span>{selectedCountry.code}</span>
+                      <span>{formData.phoneCountryCode}</span>
                     </span>
                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
@@ -213,7 +218,7 @@ const Register = () => {
                           key={country.code + country.iso2}
                           type="button"
                           className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center"
-                          onClick={() => handleCountryCodeSelect(country.code)}
+                          onClick={() => handleCountryCodeSelect(country.code, country.country)}
                         >
                           <ReactCountryFlag 
                             countryCode={country.iso2} 

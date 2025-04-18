@@ -191,3 +191,115 @@ exports.logoutUser = (req, res) => {
   });
   res.status(200).json({ message: 'Logged out successfully' });
 };
+
+// @desc    Forgot password - send reset code
+// @route   POST /api/auth/forgot-password
+// @access  Public
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      // For security reasons, don't reveal if the email exists or not
+      return res.json({ message: 'If your email is registered, you will receive a reset code shortly.' });
+    }
+    
+    // Generate reset code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    
+    // Save reset code to user
+    user.resetPasswordCode = resetCode;
+    user.resetPasswordCodeExpires = resetCodeExpires;
+    await user.save();
+    
+    // Send email with reset code
+    await sendEmail({
+      to: email,
+      subject: 'Password Reset Code',
+      text: `Your password reset code is: ${resetCode}. This code will expire in 10 minutes.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4f46e5;">Password Reset Code</h2>
+          <p>You requested a password reset for your account.</p>
+          <p>Your password reset code is: <b style="font-size: 18px;">${resetCode}</b></p>
+          <p>This code will expire in 10 minutes.</p>
+          <p>If you didn't request this reset, please ignore this email or contact support if you have concerns.</p>
+        </div>
+      `
+    });
+    
+    res.json({ message: 'If your email is registered, you will receive a reset code shortly.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'An error occurred while processing your request.' });
+  }
+};
+
+// @desc    Verify reset code
+// @route   POST /api/auth/verify-reset-code
+// @access  Public
+exports.verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset code.' });
+    }
+    
+    // Verify reset code
+    if (
+      !user.resetPasswordCode ||
+      user.resetPasswordCode !== code ||
+      !user.resetPasswordCodeExpires ||
+      Date.now() > user.resetPasswordCodeExpires
+    ) {
+      return res.status(400).json({ message: 'Invalid or expired reset code.' });
+    }
+    
+    res.json({ message: 'Reset code verified successfully.' });
+  } catch (error) {
+    console.error('Verify reset code error:', error);
+    res.status(500).json({ message: 'An error occurred while processing your request.' });
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset code.' });
+    }
+    
+    // Verify reset code
+    if (
+      !user.resetPasswordCode ||
+      user.resetPasswordCode !== code ||
+      !user.resetPasswordCodeExpires ||
+      Date.now() > user.resetPasswordCodeExpires
+    ) {
+      return res.status(400).json({ message: 'Invalid or expired reset code.' });
+    }
+    
+    // Set new password
+    user.password = newPassword;
+    user.resetPasswordCode = null;
+    user.resetPasswordCodeExpires = null;
+    await user.save();
+    
+    res.json({ message: 'Password has been reset successfully.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'An error occurred while processing your request.' });
+  }
+};

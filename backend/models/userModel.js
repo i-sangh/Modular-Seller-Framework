@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema(
     },
     phoneCountryCode: {
       type: String,
-      default: '+1'
+      default: '+1 : United States'
     },
     phoneNumber: {
       type: String,
@@ -39,6 +39,14 @@ const userSchema = mongoose.Schema(
       default: null
     },
     verificationCodeExpires: {
+      type: Date,
+      default: null
+    },
+    resetPasswordCode: {
+      type: String,
+      default: null
+    },
+    resetPasswordCodeExpires: {
       type: Date,
       default: null
     }

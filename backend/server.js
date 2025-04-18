@@ -10,6 +10,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
+const schedulerService = require('./services/schedulerService');
 
 // Initialize express app
 const app = express();
@@ -35,6 +36,26 @@ app.get('/', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Start the scheduler service after server is up
+  schedulerService.start();
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  schedulerService.stop();
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  schedulerService.stop();
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
 });
